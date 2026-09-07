@@ -1,0 +1,142 @@
+<!-- @dsCard group="Portfolio" viewport="1280x800" name="Filmmaker Portfolio" subtitle="Interactive home + work detail" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Rafael Cortissoz — Portfolio</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="i18n.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+body{margin:0}
+@keyframes rcFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rcFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes rcScaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+@keyframes rcCut{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="YouTubeEmbed.jsx"></script>
+<script src="analytics.js"></script>
+<script type="text/babel" src="Intro.jsx"></script>
+<script type="text/babel" src="Hero.jsx"></script>
+<script type="text/babel" src="Services.jsx"></script>
+<script type="text/babel" src="WorkGrid.jsx"></script>
+<script type="text/babel" src="WorkDetail.jsx"></script>
+<script type="text/babel" src="MapView.jsx"></script>
+<script type="text/babel" src="WorkIndexList.jsx"></script>
+<script type="text/babel" src="Bio.jsx"></script>
+<script type="text/babel" src="ContactSection.jsx"></script>
+<script type="text/babel" src="Footer.jsx"></script>
+<script type="text/babel" src="Reveal.jsx"></script>
+<script type="text/babel" src="FloatingWhatsApp.jsx"></script>
+<script type="text/babel">
+function App() {
+  const [selected, setSelected] = React.useState(null);
+  const [hoverIndex, setHoverIndex] = React.useState(null);
+  const [modalSection, setModalSection] = React.useState(null);
+  const [lang, setLang] = React.useState('es');
+  const [theme, setTheme] = React.useState('auto');
+  const [entered, setEntered] = React.useState(false);
+  const t = window.I18N[lang];
+  React.useEffect(() => {
+    const effective = theme === 'auto' ? (new Date().getHours() >= 19 || new Date().getHours() < 7 ? 'dark' : 'light') : theme;
+    if (effective === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    else document.documentElement.removeAttribute('data-theme');
+  }, [theme]);
+  const topBar = (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '32px', padding: '14px 64px', fontFamily: 'var(--font-mono)', fontSize: '15px', letterSpacing: '0.06em' }}>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {['es', 'en'].map((code) => (
+          <button key={code} onClick={() => setLang(code)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', padding: 0,
+            color: lang === code ? 'var(--color-text)' : 'var(--color-muted)',
+            textDecoration: lang === code ? 'underline' : 'none', textUnderlineOffset: '3px',
+          }}>{code}</button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {[['dark', 'Black'], ['light', 'Bone'], ['auto', t.autoTheme]].map(([code, label]) => (
+          <button key={code} onClick={() => setTheme(code)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', padding: 0,
+            color: theme === code ? 'var(--color-text)' : 'var(--color-muted)',
+            textDecoration: theme === code ? 'underline' : 'none', textUnderlineOffset: '3px',
+          }}>{label}</button>
+        ))}
+      </div>
+    </div>
+  );
+  const navStyle = (key) => ({
+    fontSize: '16px', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text)',
+    background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', padding: 0,
+  });
+  const modalTitles = { work: t.navWork, bio: t.navBio, contact: t.navContact, map: t.navMap };
+  if (!entered) {
+    return <window.Intro onEnter={() => setEntered(true)} lang={lang} />;
+  }
+  if (selected != null) {
+    return (<React.Fragment><window.WorkDetail list={window.WORKS} index={selected} onNavigate={setSelected} onClose={() => setSelected(null)} lang={lang} /><window.FloatingWhatsApp /></React.Fragment>);
+  }
+  if (modalSection) {
+    return (
+      <React.Fragment>
+      <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--color-bg)' }}>
+        <div style={{ padding: '32px 43px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <i className={'ph-bold ph-' + (modalSection === 'work' ? 'film-strip' : modalSection === 'bio' ? 'identification-badge' : modalSection === 'map' ? 'map-pin' : 'chat-circle')} style={{ fontSize: '22px' }}></i>
+            {modalTitles[modalSection]}
+          </span>
+          <button onClick={() => setModalSection(null)} style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', letterSpacing: '0.06em', textTransform: 'uppercase', background: 'none', border: 'none', color: 'var(--color-text)', cursor: 'pointer' }}>{t.close}</button>
+        </div>
+        {modalSection === 'work' && <window.WorkGrid onSelect={(i) => setSelected(i)} lang={lang} />}
+        {modalSection === 'map' && <div style={{ padding: '32px' }}><window.MapView onSelectWork={(i) => setSelected(i)} lang={lang} /></div>}
+        {modalSection === 'bio' && <window.Bio lang={lang} />}
+        {modalSection === 'contact' && <window.ContactSection lang={lang} />}
+      </div>
+      <window.FloatingWhatsApp />
+      </React.Fragment>
+    );
+  }
+  return (
+    <div>
+      {topBar}
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '32px 43px', borderBottom: '1px solid var(--color-border)', fontFamily: 'var(--font-mono)' }}>
+        <span style={{ fontSize: '18px', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>RAFAEL CORTISSOZ</span>
+        <div style={{ display: 'flex', gap: '43px' }}>
+          <button style={navStyle('work')} onClick={() => setModalSection('work')}>{t.navWork}</button>
+          <button style={navStyle('map')} onClick={() => setModalSection('map')}>{t.navMap}</button>
+          <button style={navStyle('bio')} onClick={() => setModalSection('bio')}>{t.navBio}</button>
+          <button style={navStyle('contact')} onClick={() => setModalSection('contact')}>{t.navContact}</button>
+        </div>
+      </nav>
+      <window.Hero lang={lang} />
+      <window.Reveal>
+      <section style={{ padding: '32px 56px 48px', borderBottom: '1px solid var(--color-border)' }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px, 2.4vw, 28px)', letterSpacing: '-0.01em', color: 'var(--color-text)', margin: 0, maxWidth: '640px' }}>{t.servicesMapBridge}</p>
+      </section>
+      </window.Reveal>
+      <window.Reveal>
+      <section style={{ padding: '0 56px 48px', borderBottom: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '48px', alignItems: 'start' }}>
+          <window.MapView onSelectWork={(i) => setSelected(i)} onHoverWork={setHoverIndex} hoverIndex={hoverIndex} lang={lang} />
+          <window.WorkIndexList onSelect={(i) => setSelected(i)} onHover={setHoverIndex} hoverIndex={hoverIndex} onViewAll={() => setModalSection('work')} lang={lang} />
+        </div>
+      </section>
+      </window.Reveal>
+      <window.Bio lang={lang} />
+      <window.ContactSection lang={lang} />
+      <window.Footer />
+      <window.FloatingWhatsApp />
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
